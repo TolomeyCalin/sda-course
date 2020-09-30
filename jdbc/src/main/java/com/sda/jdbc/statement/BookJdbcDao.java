@@ -1,4 +1,6 @@
-package com.sda.jdbc;
+package com.sda.jdbc.statement;
+
+import com.sda.jdbc.Book;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,11 +15,10 @@ public class BookJdbcDao {
 
     public static final String URL = "jdbc:mysql://localhost:3306/jdbc_tutorial?serverTimezone=UTC";
     public static final String USER = "root";
-    public static final String PASSWORD = "1m2u3i4e";
+    public static final String PASSWORD = "Rootpass3#";
 
     // create
     public void create(Book book) {
-
         try {
             // add book in table
             // get connection
@@ -39,13 +40,6 @@ public class BookJdbcDao {
         } catch (SQLException e) {
             System.out.println("book not saved");
         }
-
-        // read
-
-
-        // update
-
-        // delete
     }
 
     public List<Book> findAll() {
@@ -74,35 +68,61 @@ public class BookJdbcDao {
         return result;
     }
 
-    public void update( int id, Book newBookData){
+    // update
+    public void update(int id, Book newBookData) {
+        Statement statement = null;
+        Connection connection = null;
         try {
-            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            Statement statement = connection.createStatement();
-
-            String sql = "UPDATE book SET title = '" + newBookData.getTitle() + "', " + "author = '" +
-                    newBookData.getAuthor() + "'WHERE id = " + id;
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            statement = connection.createStatement();
+            String sql = "UPDATE book SET title = '" + newBookData.getTitle() + "', " +
+                "author = '" + newBookData.getAuthor() + "' WHERE id = " + id;
             int rowsAffected = statement.executeUpdate(sql);
 
             if (rowsAffected == 1) {
                 System.out.println("book updated");
             }
-            connection.close();
         } catch (SQLException e) {
-            System.out.println("book not saved");
+            System.out.println("book not updated");
+        } catch (Exception e) {
+            System.out.println("something went wrong");
+        } finally {
+            // close resources
+
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("failed to close statement");
+            }
+
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("failed to close connection");
+            }
         }
     }
 
-    public void delete(int id){
-        try ( Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-              Statement statement = connection.createStatement()){
+    // delete
+    public void delete(int id) {
+        // try with resources
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement statement = connection.createStatement()) {
+
             String sql = "DELETE FROM book WHERE id = " + id;
             int rowsAffected = statement.executeUpdate(sql);
+
             if (rowsAffected == 1) {
                 System.out.println("book updated");
             }
-
-        } catch (SQLException exception) {
-            exception.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("book not updated");
+        } catch (Exception e) {
+            System.out.println("something went wrong");
         }
     }
 }
